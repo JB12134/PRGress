@@ -1,6 +1,6 @@
 # PRGress
 
-PRGress is a simple web-based tool for building treadmill workout programs for the Livestrong LS8.0T in XML format. It lets you create a workout name, set total time, define segments, and export a `.prg` file that can be placed on a FAT32 USB drive in the `/LS/PROGRAMS/` folder.
+PRGress is a simple web-based tool for building treadmill workout programs for the Livestrong LS8.0T in XML format. It may work on other treadmills but I can't confirm as I only have the LS8.0T. It lets you create a workout name, set total time, define segments, and export a `.prg` file that can be placed on a FAT32 USB drive in the `/LS/PROGRAMS/` folder.
 
 ## What this project includes
 
