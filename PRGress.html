@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Treadmill Program Builder</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --surface-0: #f1efe8; --surface-1: #f7f6f2; --surface-2: #ffffff;
+    --text-primary: #1a1a18; --text-secondary: #5f5e5a; --text-muted: #888780;
+    --text-accent: #185fa5; --text-danger: #a32d2d;
+    --bg-accent: #e6f1fb; --bg-danger: #fcebeb;
+    --border: rgba(0,0,0,0.12); --border-accent: #85b7eb;
+    --radius: 8px; --font-sans: system-ui, sans-serif; --font-mono: ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-0: #1c1c1a; --surface-1: #252522; --surface-2: #2e2e2b;
+      --text-primary: #e8e7e2; --text-secondary: #a8a79f; --text-muted: #6b6a64;
+      --text-accent: #85b7eb; --text-danger: #f09595;
+      --bg-accent: #0c447c22; --bg-danger: #a32d2d22;
+      --border: rgba(255,255,255,0.1); --border-accent: #378add;
+    }
+  }
+  body { margin: 0; background: var(--surface-0); color: var(--text-primary); font-family: var(--font-sans); font-size: 16px; line-height: 1.5; }
+  .page { max-width: 720px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  h1 { font-size: 22px; font-weight: 500; margin: 0 0 0.25rem; }
+  .subtitle { font-size: 14px; color: var(--text-muted); margin: 0 0 2rem; }
+  .section-head { font-size: 13px; font-weight: 500; color: var(--text-secondary); margin: 1.5rem 0 0.5rem; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  label { font-size: 13px; color: var(--text-secondary); }
+  input, select {
+    width: 100%; padding: 7px 10px; font-size: 14px; font-family: inherit;
+    background: var(--surface-2); color: var(--text-primary);
+    border: 0.5px solid var(--border); border-radius: var(--radius);
+    outline: none; transition: border-color 0.15s;
+  }
+  input:focus, select:focus { border-color: var(--border-accent); box-shadow: 0 0 0 3px var(--bg-accent); }
+  button {
+    padding: 7px 14px; font-size: 14px; font-family: inherit; cursor: pointer;
+    background: transparent; color: var(--text-primary);
+    border: 0.5px solid var(--border); border-radius: var(--radius);
+    transition: background 0.12s;
+  }
+  button:hover { background: var(--surface-1); }
+  button:active { transform: scale(0.98); }
+  .btn-accent { border-color: var(--border-accent); color: var(--text-accent); }
+  .btn-accent:hover { background: var(--bg-accent); }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 0.5rem 0; }
+  .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: var(--radius); background: var(--bg-accent); color: var(--text-accent); margin-left: 6px; vertical-align: middle; }
+  .seg-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 0.75rem 0; }
+  .seg-table th { text-align: left; font-weight: 500; font-size: 12px; color: var(--text-muted); padding: 6px 8px; border-bottom: 0.5px solid var(--border); white-space: nowrap; }
+  .seg-table td { padding: 5px 4px; vertical-align: middle; }
+  .seg-table tr:not(:last-child) td { border-bottom: 0.5px solid var(--border); }
+  .seg-table input[type=number] { min-width: 0; padding: 4px 6px; font-size: 13px; }
+  .seg-table select { font-size: 13px; padding: 4px 6px; }
+  .del-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 2px 8px; font-size: 18px; line-height: 1; border-radius: var(--radius); }
+  .del-btn:hover { color: var(--text-danger); background: var(--bg-danger); }
+  .xml-out {
+    background: var(--surface-1); border: 0.5px solid var(--border); border-radius: var(--radius);
+    padding: 1rem; font-family: var(--font-mono); font-size: 12px;
+    white-space: pre; overflow-x: auto; margin-top: 1rem;
+    color: var(--text-primary); max-height: 380px; overflow-y: auto;
+  }
+  .hint { font-size: 12px; color: var(--text-muted); margin: 0.5rem 0 0; }
+  .divider { border: none; border-top: 0.5px solid var(--border); margin: 1.5rem 0; }
+  .download-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 0.75rem; }
+  #filename-input { max-width: 220px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Treadmill program builder</h1>
+  <p class="subtitle">Livestrong LS8.0T &mdash; place output XML in <code>/LS/PROGRAMS/</code> on a FAT32 USB drive</p>
+
+  <p class="section-head">Program info</p>
+  <div class="row">
+    <div class="field"><label for="pname">Name</label><input id="pname" type="text" value="SummitClimb" maxlength="20"></div>
+    <div class="field"><label for="ptime">Total time (minutes)</label><input id="ptime" type="number" value="30" min="1" max="99"></div>
+  </div>
+
+  <hr class="divider">
+
+  <p class="section-head">Segments <span class="badge" id="seg-count">0 segments</span></p>
+  <table class="seg-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Duration (sec)</th>
+        <th>Incline (0–15)</th>
+        <th>Speed (mph)</th>
+        <th>Type</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="seg-body"></tbody>
+  </table>
+
+  <div class="btn-row">
+    <button onclick="addSeg(0,'warmup')"><i class="ti ti-player-play" aria-hidden="true"></i> Warmup</button>
+    <button onclick="addSeg(1,'run')"><i class="ti ti-run" aria-hidden="true"></i> Run interval</button>
+    <button onclick="addSeg(1,'break')"><i class="ti ti-pause" aria-hidden="true"></i> Break</button>
+    <button onclick="addSeg(0,'cooldown')"><i class="ti ti-player-stop" aria-hidden="true"></i> Cooldown</button>
+  </div>
+
+  <hr class="divider">
+
+  <div class="btn-row">
+    <button class="btn-accent" onclick="generate()"><i class="ti ti-code" aria-hidden="true"></i> Generate XML</button>
+    <button onclick="loadDefault()"><i class="ti ti-refresh" aria-hidden="true"></i> Reset to SummitClimb</button>
+  </div>
+
+  <div id="xml-section" style="display:none">
+    <div class="xml-out" id="xml-out"></div>
+    <p class="hint">Incline range: 0–15 &nbsp;&bull;&nbsp; Speed range: 0.1–19.9 mph</p>
+    <div class="download-row">
+      <input id="filename-input" type="text" value="SummitClimb.prg" placeholder="filename.xml">
+      <button class="btn-accent" onclick="downloadXml()"><i class="ti ti-download" aria-hidden="true"></i> Download</button>
+      <button onclick="copyXml()" id="copy-btn"><i class="ti ti-copy" aria-hidden="true"></i> Copy</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let segs = [];
+let xmlContent = '';
+
+const DEFAULTS = {
+  name: 'SummitClimb',
+  time: 30,
+  segs: [
+    { duration: 120, incline: 0,  speed: 3.0, type: 0 },
+    { duration: 180, incline: 3,  speed: 3.2, type: 1 },
+    { duration: 60,  incline: 0,  speed: 2.8, type: 1 },
+    { duration: 180, incline: 6,  speed: 3.2, type: 1 },
+    { duration: 60,  incline: 0,  speed: 2.8, type: 1 },
+    { duration: 180, incline: 8,  speed: 3.0, type: 1 },
+    { duration: 60,  incline: 0,  speed: 2.8, type: 1 },
+    { duration: 180, incline: 12, speed: 2.8, type: 1 },
+    { duration: 60,  incline: 0,  speed: 2.5, type: 1 },
+    { duration: 120, incline: 0,  speed: 2.5, type: 0 },
+  ]
+};
+
+function addSeg(type, hint) {
+  let s = { duration: 60, incline: 0, speed: 3.0, type };
+  if (hint === 'run')      { s.incline = 5; s.speed = 3.5; }
+  if (hint === 'break')    { s.incline = 0; s.speed = 2.8; }
+  if (hint === 'cooldown') { s.speed = 2.5; }
+  segs.push(s);
+  render();
+}
+
+function removeSeg(i) {
+  segs.splice(i, 1);
+  render();
+}
+
+function render() {
+  const tbody = document.getElementById('seg-body');
+  tbody.innerHTML = '';
+  segs.forEach((s, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--text-muted);font-size:13px;padding:5px 8px">${i + 1}</td>
+      <td><input type="number" min="1" max="3600" value="${s.duration}" onchange="segs[${i}].duration=+this.value"></td>
+      <td><input type="number" min="0" max="15" value="${s.incline}" onchange="segs[${i}].incline=+this.value"></td>
+      <td><input type="number" min="0.1" max="19.9" step="0.1" value="${s.speed.toFixed(1)}" onchange="segs[${i}].speed=parseFloat(this.value)"></td>
+      <td>
+        <select onchange="segs[${i}].type=+this.value">
+          <option value="0" ${s.type===0?'selected':''}>Warmup / cool</option>
+          <option value="1" ${s.type===1?'selected':''}>Run / break</option>
+        </select>
+      </td>
+      <td><button class="del-btn" onclick="removeSeg(${i})" aria-label="Remove segment ${i+1}">&times;</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('seg-count').textContent = segs.length + ' segment' + (segs.length !== 1 ? 's' : '');
+}
+
+function generate() {
+  if (segs.length === 0) { alert('Add at least one segment first.'); return; }
+  const name = document.getElementById('pname').value.trim() || 'MyProgram';
+  const t = parseInt(document.getElementById('ptime').value) || 30;
+  if (!segs.some(s => s.type === 1)) {
+    alert('At least one segment must be "Run / break" — otherwise the treadmill won\'t cycle.');
+    return;
+  }
+  const eLines = segs.map(s =>
+    `      <e><1>${s.duration}</1><2>${s.incline}</2><3>${Math.round(s.speed * 10)}</3><6>${s.type}</6></e>`
+  ).join('\n\n');
+
+  xmlContent = `<?xml version="1.0" encoding="utf-8"?>
+<program>
+  <models>
+     <1>LS13_0T</1>
+     <2>LS10_0T</2>
+     <3>LS8_0T</3>
+     <4>LSPRO1</4>
+     <5>LSPRO2</5>
+     <6>LS13_0T_C1</6>
+  </models>
+  <package>FUSION</package>
+  <psn>000001</psn>
+  <name>${name}</name>
+  <version>H101S101</version>
+  <levelamount>1</levelamount>
+  <segamount>18</segamount>
+  <parameters>
+    <parameter>
+      <id>1</id>
+      <name>time</name>
+    </parameter>
+    <parameter>
+      <id>2</id>
+      <name>incline</name>
+    </parameter>
+    <parameter>
+      <id>3</id>
+      <name>speed</name>
+    </parameter>
+    <parameter>
+      <id>4</id>
+      <name>resistance</name>
+    </parameter>
+    <parameter>
+      <id>5</id>
+      <name>message</name>
+    </parameter>
+    <parameter>
+      <id>6</id>
+      <name>repeat</name>
+    </parameter>
+  </parameters>
+  <levels>
+    <!-- Level 1 -->
+    <level>
+      <t>${t}</t>
+
+${eLines}
+
+    </level>
+  </levels>
+</program>`;
+
+  document.getElementById('xml-out').textContent = xmlContent;
+  document.getElementById('xml-section').style.display = 'block';
+  document.getElementById('filename-input').value = name + '.prg';
+}
+
+function downloadXml() {
+  if (!xmlContent) return;
+  const filename = document.getElementById('filename-input').value.trim() || 'program.xml';
+  const blob = new Blob([xmlContent], { type: 'application/octet-stream' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function copyXml() {
+  if (!xmlContent) return;
+  navigator.clipboard.writeText(xmlContent).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Copied!';
+    setTimeout(() => btn.innerHTML = '<i class="ti ti-copy" aria-hidden="true"></i> Copy', 1500);
+  });
+}
+
+function loadDefault() {
+  document.getElementById('pname').value = DEFAULTS.name;
+  document.getElementById('ptime').value = DEFAULTS.time;
+  segs = DEFAULTS.segs.map(s => ({ ...s }));
+  render();
+  document.getElementById('xml-section').style.display = 'none';
+}
+
+loadDefault();
+</script>
+</body>
+</html>
