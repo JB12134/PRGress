@@ -16,6 +16,18 @@ PRGress is a simple web-based tool for building treadmill workout programs for t
 5. Download or copy the generated XML and save it as a `.prg` file.
 6. Copy the file to your USB drive under `/LS/PROGRAMS/`.
 
+## USB setup
+
+Format your USB drive as FAT32 and create the following folder structure:
+
+    LS/
+    ├── FW/
+    ├── PROGRAMS/
+    │   └── YourWorkout.prg
+    └── USERS/
+
+Plug the USB into your treadmill and it will prompt you to import any programs found in `/LS/PROGRAMS/`.
+
 ## Example programs
 
 The [DemoPrograms](DemoPrograms) folder contains sample programs you can review and adapt.
